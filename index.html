@@ -1574,6 +1574,80 @@
       -webkit-overflow-scrolling: auto;
     }
 
+    
+    /* 分享点菜按钮 */
+    .btn-share-menu {
+      background: #EBF4EB;
+      border: 1.5px solid #2E7D32;
+      box-shadow: 1px 1px 0 #2E7D32;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #1B5E20;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+      transition: all 0.12s ease;
+      font-family: inherit;
+    }
+
+    .btn-share-menu:active {
+      transform: translate(1px, 1px);
+      box-shadow: 0 0 0 #2E7D32;
+    }
+
+    /* 小票防穿透滚动自适应 */
+    #receiptModal {
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+    }
+
+    .receipt-paper {
+      max-height: 82vh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+
+    /* 收到好友新点单卡片 */
+    .incoming-order-card {
+      background: #FFFDF8;
+      border: 2px solid #C0392B;
+      box-shadow: 4px 4px 0px #C0392B;
+      border-radius: 16px;
+      padding: 20px 18px;
+      width: 90%;
+      max-width: 380px;
+      margin: auto;
+      text-align: left;
+      position: relative;
+      animation: popBounce 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popBounce {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* 监听状态指示器 */
+    .listening-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ECFDF5;
+      border: 1px solid #10B981;
+      border-radius: 12px;
+      padding: 4px 10px;
+      font-size: 11px;
+      color: #065F46;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
     /* 回到顶部手绘浮标按钮 */
     .back-to-top-btn {
       position: fixed;
@@ -2309,9 +2383,15 @@
       <div class="order-header-bar">
         <div>
           <div class="order-header-title">🛎️ 今日私房点单台</div>
-          <div class="order-header-sub">仿饭店点菜模式 · 呈现已收藏的私房拿手菜</div>
+          <div class="order-header-sub" id="orderHeaderSubTitle">仿饭店点菜模式 · 呈现已收藏的私房拿手菜</div>
         </div>
-        <button class="btn-icon" id="btnCloseOrderModal">✕</button>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <button class="btn-share-menu" id="btnShareOrderMenu" title="把菜单分享给他人点菜">
+            <span>📤</span>
+            <span>分享点单</span>
+          </button>
+          <button class="btn-icon" id="btnCloseOrderModal">✕</button>
+        </div>
       </div>
 
       <!-- 左右分栏核心布局 -->
@@ -2330,8 +2410,71 @@
         </div>
         <div style="display: flex; gap: 8px;">
           <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;" id="btnClearOrderCart">清空</button>
-          <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;" id="btnGenerateReceipt">👨‍🍳 下单生成菜单</button>
+          <button class="btn btn-primary" style="padding: 8px 18px; font-size: 13px; font-weight: 900;" id="btnGenerateReceipt">👨‍🍳 下单</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分享专属私房菜单给好友 Modal -->
+  <div class="modal-overlay" id="shareMenuModal">
+    <div class="receipt-paper" style="max-height: 85vh;">
+      <div class="receipt-header-stamp" style="border-color: #2E7D32; color: #2E7D32;">【私房邀请】</div>
+      <h3 style="font-size: 17px; font-weight: 900; color: var(--ink); text-align: center; margin-bottom: 4px;">📤 分享私房菜单点餐</h3>
+      <p style="font-size: 12px; color: var(--ink-light); text-align: center; margin-bottom: 12px;">
+        分享给家人或朋友，TA 在手机上点菜并点击【下单】，您的手机会立刻收到点单通知！
+      </p>
+
+      <div id="shareQrOutput" style="display: flex; justify-content: center; margin: 12px 0;"></div>
+
+      <div class="listening-status-pill" style="width: 100%; justify-content: center; box-sizing: border-box; margin-bottom: 14px;">
+        <span class="pulse-dot"></span>
+        <span>正在实时连线等待好友点餐...</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button class="btn btn-primary" style="width: 100%;" id="btnCopyShareLink">📋 复制点菜链接发给好友微信</button>
+        <button class="btn btn-secondary" style="width: 100%;" id="btnCloseShareMenu">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 顾客下单输入昵称弹窗 -->
+  <div class="modal-overlay" id="guestConfirmModal">
+    <div class="receipt-paper" style="max-height: 80vh;">
+      <h3 style="font-size: 17px; font-weight: 900; color: var(--ink); text-align: center; margin-bottom: 6px;">🛎️ 提交点单给主厨</h3>
+      <p style="font-size: 12px; color: var(--ink-light); text-align: center; margin-bottom: 14px;">
+        点好的佳肴将立刻飞传至主厨手机！
+      </p>
+      <div style="margin-bottom: 12px;">
+        <label style="font-size: 12px; font-weight: 800; display: block; margin-bottom: 4px;">您的大名或昵称 *</label>
+        <input type="text" class="custom-pantry-input" id="guestNameInput" placeholder="如：老婆、小明、妈妈" style="width: 100%; box-sizing: border-box;">
+      </div>
+      <div style="margin-bottom: 16px;">
+        <label style="font-size: 12px; font-weight: 800; display: block; margin-bottom: 4px;">给主厨的口味备注 (选填)</label>
+        <input type="text" class="custom-pantry-input" id="guestNoteInput" placeholder="如：少放辣、多放葱花、清淡点" style="width: 100%; box-sizing: border-box;">
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary" style="flex: 1;" id="btnCancelGuestOrder">返回修改</button>
+        <button class="btn btn-primary" style="flex: 1;" id="btnSubmitGuestOrder">🚀 确认下单</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主厨收到好友点单弹窗 -->
+  <div class="modal-overlay" id="incomingOrderModal">
+    <div class="incoming-order-card">
+      <div class="receipt-header-stamp">【收到新点单】</div>
+      <h3 style="font-size: 18px; font-weight: 900; color: #C0392B; text-align: center; margin-bottom: 4px;">🛎️ 叮咚！有新点单到达！</h3>
+      <div style="font-size: 12px; color: var(--ink); font-weight: 700; margin-bottom: 2px;" id="incomingCustomerName">来自顾客：朋友</div>
+      <div style="font-size: 11px; color: var(--ink-light); margin-bottom: 6px;" id="incomingOrderTime">时间：--</div>
+      <div style="font-size: 11px; color: #C0392B; background: #FDF2E9; padding: 4px 8px; border-radius: 6px; margin-bottom: 10px; display: none;" id="incomingOrderNote"></div>
+
+      <div id="incomingOrderItemsList" style="margin-bottom: 14px; font-size: 13px; font-weight: 700;"></div>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary" style="flex: 1;" id="btnAcceptIncomingOrder">👨‍🍳 立即接单</button>
+        <button class="btn btn-secondary" style="flex: 1;" id="btnCloseIncomingOrder">我知道了</button>
       </div>
     </div>
   </div>
@@ -2423,7 +2566,8 @@
       if (!nav) return;
       nav.innerHTML = '';
 
-      const favRecipes = recipes.filter(r => favorites.has(r.id));
+      const activeFavSet = (isGuestMode && guestFavsSet) ? guestFavsSet : favorites;
+      const favRecipes = recipes.filter(r => activeFavSet.has(r.id));
       const categories = [
         { name: "全部", icon: "✨" },
         { name: "家常小炒", icon: "🍳" },
@@ -2461,7 +2605,8 @@
       listContainer.innerHTML = '';
 
       // 1. 过滤已收藏的菜品
-      const favRecipes = recipes.filter(r => favorites.has(r.id));
+      const activeFavSet = (isGuestMode && guestFavsSet) ? guestFavsSet : favorites;
+      const favRecipes = recipes.filter(r => activeFavSet.has(r.id));
 
       if (favRecipes.length === 0) {
         listContainer.innerHTML = `
@@ -2614,12 +2759,28 @@
       if (metaEl) metaEl.textContent = `⏱️ 预计烹饪约 ${totalMinutes} 分钟`;
     }
 
+    // 接收点单与协同连线相关状态
+    let currentTableId = null;
+    let tableEventSource = null;
+    let isGuestMode = false;
+    let guestFavsSet = null;
+
+    // 显示点菜小票 (已彻底修复前一层滑动穿透)
     function showOrderReceipt() {
       if (orderCart.size === 0) {
         alert('您还没有点任何菜品哦，请先在菜单中挑选几道心仪好菜吧！');
         return;
       }
 
+      // 顾客模式下点击下单，弹出昵称输入框准备提交给主厨
+      if (isGuestMode) {
+        document.getElementById('guestConfirmModal').classList.add('active');
+        document.body.classList.add('modal-locked');
+        return;
+      }
+
+      const receiptModal = document.getElementById('receiptModal');
+      const orderModal = document.getElementById('orderModal');
       const receiptList = document.getElementById('receiptItemsList');
       const timeEl = document.getElementById('receiptTimestampText');
       const now = new Date();
@@ -2640,12 +2801,258 @@
       });
       receiptList.innerHTML = html;
 
-      document.getElementById('receiptModal').classList.add('active');
+      // 关键修复：打开小票时，阻断底层 orderModal 的手势穿透
+      if (orderModal) {
+        orderModal.style.pointerEvents = 'none';
+      }
+
+      receiptModal.classList.add('active');
+      document.body.classList.add('modal-locked');
       playWinSound();
       triggerConfetti();
     }
 
-    // 绑定点菜与回到顶部事件
+    // 主厨开启点单共享房间，监听好友下单
+    function openShareMenuModal() {
+      const favRecipes = recipes.filter(r => favorites.has(r.id));
+      if (favRecipes.length === 0) {
+        alert('请先在菜谱库中点击红心 ❤️ 收藏几道您的拿手好菜，再分享菜单给好友点餐哦！');
+        return;
+      }
+
+      // 生成或复用当前桌号频道
+      if (!currentTableId) {
+        currentTableId = 'chef_' + Math.random().toString(36).substring(2, 8);
+      }
+
+      // 生成分享链接（带桌号与主厨收藏菜品 ID 列表）
+      const favIds = favRecipes.map(r => r.id).join(',');
+      const baseUrl = window.location.origin + window.location.pathname;
+      const shareUrl = `${baseUrl}?table=${currentTableId}&favs=${favIds}`;
+
+      // 渲染二维码
+      const qrBox = document.getElementById('shareQrOutput');
+      qrBox.innerHTML = '';
+      if (window.QRCode) {
+        new QRCode(qrBox, {
+          text: shareUrl,
+          width: 170,
+          height: 170,
+          colorDark: "#382B22",
+          colorLight: "#FFFFFF",
+          correctLevel: 2
+        });
+      }
+
+      // 绑定复制按钮
+      document.getElementById('btnCopyShareLink').onclick = () => {
+        const text = `🍽️ 这是我的私房菜单，快来点你想吃的菜吧！点击进入点餐：\n${shareUrl}`;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).then(() => {
+            alert('✅ 点菜链接已复制！可直接发到微信群或好友聊天中！');
+          });
+        } else {
+          prompt('请长按复制下方点菜链接发给好友：', text);
+        }
+      };
+
+      // 开启实时监听好友点单
+      startListeningOrders(currentTableId);
+
+      document.getElementById('shareMenuModal').classList.add('active');
+      document.body.classList.add('modal-locked');
+      playBeep(750, 0.05);
+    }
+
+    // 实时监听来自好友的下单推送 (通过 ntfy.sh 免费极速 Pub/Sub)
+    function startListeningOrders(tableId) {
+      if (tableEventSource) return;
+      const topic = 'myrecipes_' + tableId;
+
+      try {
+        tableEventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
+        tableEventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data && data.message) {
+              const orderPayload = JSON.parse(data.message);
+              handleIncomingOrder(orderPayload);
+            }
+          } catch (e) {}
+        };
+      } catch (e) {}
+
+      // 增加轮询保底机制
+      setInterval(() => {
+        fetch(`https://ntfy.sh/${topic}/json?poll=1`)
+          .then(r => r.text())
+          .then(text => {
+            const lines = text.trim().split('\n');
+            lines.forEach(line => {
+              try {
+                const parsed = JSON.parse(line);
+                if (parsed.message) {
+                  const payload = JSON.parse(parsed.message);
+                  if (payload.id && !window['_seen_order_' + payload.id]) {
+                    window['_seen_order_' + payload.id] = true;
+                    handleIncomingOrder(payload);
+                  }
+                }
+              } catch (e) {}
+            });
+          }).catch(() => {});
+      }, 3500);
+    }
+
+    // 处理收到的好友点单
+    function handleIncomingOrder(order) {
+      if (!order || !order.items || order.items.length === 0) return;
+
+      // 播放清脆进单提示铃声
+      playWinSound();
+      triggerConfetti();
+
+      // 填充新订单详情
+      document.getElementById('incomingCustomerName').textContent = `来自顾客：【${order.customerName || '好友'}】`;
+      document.getElementById('incomingOrderTime').textContent = `下单时间：${order.timestamp || '刚刚'}`;
+      const noteEl = document.getElementById('incomingOrderNote');
+      if (order.note) {
+        noteEl.textContent = `口味备注：${order.note}`;
+        noteEl.style.display = 'block';
+      } else {
+        noteEl.style.display = 'none';
+      }
+
+      let html = '';
+      order.items.forEach((item, idx) => {
+        html += `
+          <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #E5D8C5;">
+            <span>${idx + 1}. ${item.cover || '🍲'} ${item.name}</span>
+            <span style="color: var(--primary); font-weight: 800;">x ${item.qty} 份</span>
+          </div>
+        `;
+      });
+      document.getElementById('incomingOrderItemsList').innerHTML = html;
+
+      // 打开弹窗并加锁
+      document.getElementById('incomingOrderModal').classList.add('active');
+      document.body.classList.add('modal-locked');
+
+      // 绑定一键接单
+      document.getElementById('btnAcceptIncomingOrder').onclick = () => {
+        order.items.forEach(it => {
+          const cur = orderCart.get(it.id) || 0;
+          orderCart.set(it.id, cur + it.qty);
+        });
+        saveOrderCart();
+        document.getElementById('incomingOrderModal').classList.remove('active');
+        document.body.classList.remove('modal-locked');
+        showOrderReceipt();
+      };
+
+      document.getElementById('btnCloseIncomingOrder').onclick = () => {
+        document.getElementById('incomingOrderModal').classList.remove('active');
+        document.body.classList.remove('modal-locked');
+      };
+    }
+
+    // 顾客提交订单至主厨
+    function submitGuestOrder() {
+      const nameInput = document.getElementById('guestNameInput');
+      const noteInput = document.getElementById('guestNoteInput');
+      const customerName = (nameInput.value || '').trim() || '好友';
+      const note = (noteInput.value || '').trim();
+
+      const items = [];
+      orderCart.forEach((qty, id) => {
+        const r = recipes.find(item => item.id === id);
+        if (r) {
+          items.push({ id: r.id, name: r.name, qty, cover: r.cover || '🍲', time: r.time || '15分钟' });
+        }
+      });
+
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      const orderData = {
+        id: 'ord_' + Date.now(),
+        tableId: currentTableId,
+        customerName,
+        note,
+        timestamp: timeStr,
+        items
+      };
+
+      const topic = 'myrecipes_' + currentTableId;
+
+      // 发送至 ntfy.sh
+      fetch(`https://ntfy.sh/${topic}`, {
+        method: 'POST',
+        body: JSON.stringify(orderData)
+      }).then(() => {
+        document.getElementById('guestConfirmModal').classList.remove('active');
+        alert(`🎉 恭喜 ${customerName}，点单已成功送达主厨手机！主厨将很快为您开火下厨！`);
+        orderCart.clear();
+        saveOrderCart();
+        renderOrderMenuList();
+      }).catch(() => {
+        // 网络异常保底方案：生成微信小纸条
+        document.getElementById('guestConfirmModal').classList.remove('active');
+        const text = `🛎️ 主厨，我已点好菜：\n${items.map((it, i) => `${i+1}. ${it.name} x${it.qty}`).join('\n')}\n备注：${note || '无'}`;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).then(() => {
+            alert('已将点单内容复制到剪贴板，可直接发到微信告诉主厨！');
+          });
+        } else {
+          prompt('请复制点单发给主厨：', text);
+        }
+      });
+    }
+
+    // 检查并解析 URL 参数 (处理顾客扫码点餐与订单分享导入)
+    function checkUrlOrderParams() {
+      const params = new URLSearchParams(window.location.search);
+      const table = params.get('table');
+      const favs = params.get('favs');
+      const order = params.get('order');
+      const from = params.get('from');
+
+      // 1. 如果带有 table 参数，说明是好友点击了点餐链接进入顾客点餐模式
+      if (table) {
+        isGuestMode = true;
+        currentTableId = table;
+        if (favs) {
+          guestFavsSet = new Set(favs.split(','));
+        }
+
+        setTimeout(() => {
+          const subTitle = document.getElementById('orderHeaderSubTitle');
+          if (subTitle) subTitle.textContent = '🌟 欢迎点餐！主厨已为您备好私房菜单，选好请点【下单】';
+          const shareBtn = document.getElementById('btnShareOrderMenu');
+          if (shareBtn) shareBtn.style.display = 'none';
+
+          renderOrderCategories();
+          renderOrderMenuList();
+          document.getElementById('orderModal').classList.add('active');
+          document.body.classList.add('modal-locked');
+        }, 300);
+      }
+
+      // 2. 如果带有直接订单参数
+      if (order) {
+        setTimeout(() => {
+          const pairs = order.split(',');
+          pairs.forEach(p => {
+            const [id, qty] = p.split(':');
+            if (id && qty) orderCart.set(id, parseInt(qty, 10) || 1);
+          });
+          saveOrderCart();
+          alert(`🛎️ 成功载入来自【${from || '好友'}】的点餐订单！`);
+          showOrderReceipt();
+        }, 500);
+      }
+    }
+
+    // 绑定点菜、分享与回到顶部事件
     function bindOrderEvents() {
       const openBtn = document.getElementById('btnOpenOrderModal');
       const closeBtn = document.getElementById('btnCloseOrderModal');
@@ -2653,6 +3060,7 @@
 
       if (openBtn) {
         openBtn.onclick = () => {
+          isGuestMode = false;
           renderOrderCategories();
           renderOrderMenuList();
           modal.classList.add('active');
@@ -2695,11 +3103,58 @@
         genBtn.onclick = showOrderReceipt;
       }
 
+      // 关闭小票时恢复 orderModal 的交互
       const closeReceiptBtn = document.getElementById('btnCloseReceipt');
       if (closeReceiptBtn) {
         closeReceiptBtn.onclick = () => {
           document.getElementById('receiptModal').classList.remove('active');
-          document.body.classList.remove('modal-locked');
+          const orderModal = document.getElementById('orderModal');
+          if (orderModal) {
+            orderModal.style.pointerEvents = '';
+            orderModal.style.overflow = '';
+          }
+          if (!modal || !modal.classList.contains('active')) {
+            document.body.classList.remove('modal-locked');
+          }
+        };
+      }
+
+      // 阻止小票蒙版外滑动穿透
+      const receiptModal = document.getElementById('receiptModal');
+      if (receiptModal) {
+        receiptModal.addEventListener('touchmove', (e) => {
+          if (!e.target.closest('.receipt-paper')) {
+            e.preventDefault();
+          }
+        }, { passive: false });
+      }
+
+      // 分享点单菜单按钮
+      const shareBtn = document.getElementById('btnShareOrderMenu');
+      if (shareBtn) {
+        shareBtn.onclick = openShareMenuModal;
+      }
+
+      const closeShareBtn = document.getElementById('btnCloseShareMenu');
+      if (closeShareBtn) {
+        closeShareBtn.onclick = () => {
+          document.getElementById('shareMenuModal').classList.remove('active');
+          if (!modal || !modal.classList.contains('active')) {
+            document.body.classList.remove('modal-locked');
+          }
+        };
+      }
+
+      // 顾客确认下单按钮
+      const submitGuestBtn = document.getElementById('btnSubmitGuestOrder');
+      if (submitGuestBtn) {
+        submitGuestBtn.onclick = submitGuestOrder;
+      }
+
+      const cancelGuestBtn = document.getElementById('btnCancelGuestOrder');
+      if (cancelGuestBtn) {
+        cancelGuestBtn.onclick = () => {
+          document.getElementById('guestConfirmModal').classList.remove('active');
         };
       }
 
@@ -2726,6 +3181,7 @@
 
       initBackToTop();
       initOrderCart();
+      checkUrlOrderParams();
     }
 
     // ==========================================
