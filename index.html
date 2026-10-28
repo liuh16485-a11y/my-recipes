@@ -1654,6 +1654,100 @@
       z-index: 350 !important;
     }
 
+    
+    /* 历史订单手绘便签卡片 */
+    .history-order-item {
+      background: #FFFDF8;
+      border: 1.5px solid var(--ink-border);
+      box-shadow: var(--sketch-shadow-sm);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+    }
+
+    .history-order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-del-history-item {
+      background: none;
+      border: none;
+      font-size: 13px;
+      color: var(--ink-light);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .btn-del-history-item:hover {
+      color: #C0392B;
+    }
+
+    .history-order-dishes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 4px 0;
+    }
+
+    .history-dish-chip {
+      background: #FAF3E6;
+      border: 1px solid var(--ink-border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .history-dish-chip:hover {
+      background: #FFE8A3;
+    }
+
+    .history-dish-chip:active {
+      transform: scale(0.96);
+    }
+
+    .history-order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+      padding-top: 6px;
+      border-top: 1px dashed #E5D8C5;
+    }
+
+    .btn-history-action {
+      background: #FFFFFF;
+      border: 1.5px solid var(--ink-border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.12s ease;
+      font-family: inherit;
+    }
+
+    .btn-history-action:active {
+      transform: translate(1px, 1px);
+    }
+
+    .btn-history-primary {
+      background: #FFE8A3;
+    }
+
     /* 回到顶部手绘浮标按钮 */
     .back-to-top-btn {
       position: fixed;
@@ -2294,6 +2388,22 @@
 
 
 
+      <!-- 点餐历史订单卡片 (本机自点 + 好友来单) -->
+      <div class="settings-card" id="orderHistoryCard">
+        <div class="settings-title" style="display: flex; justify-content: space-between; align-items: center;">
+          <span>📜 点餐历史订单 (<span id="orderHistoryCount">0</span>)</span>
+          <button class="btn-text-action" id="btnClearOrderHistory" style="color: var(--ink-light); font-size: 11px;">清空历史</button>
+        </div>
+        <p style="font-size: 12px; color: var(--ink-light); margin-bottom: 12px;">
+          包含在自己手机上下单的菜单，以及家人朋友通过分享点单发来的订单记录。
+        </p>
+
+        <!-- 历史订单动态列表 -->
+        <div id="orderHistoryList" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- JS 动态渲染 -->
+        </div>
+      </div>
+
       <div class="settings-card">
         <div class="settings-title">💾 数据备份与跨设备迁移</div>
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
@@ -2309,9 +2419,9 @@
       <div class="settings-card">
         <div class="settings-title">🔄 恢复出厂与系统重置</div>
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
-          如果误删了系统预置的 65+ 道经典名菜，可一键重新载入。
+          如果误删了系统预置的 92+ 道经典名菜，可一键重新载入。
         </p>
-        <button class="btn btn-secondary" style="color: #D32F2F; border-color: #FFCDD2;" id="btnResetDefault">恢复 65+ 道预置名菜</button>
+        <button class="btn btn-secondary" style="color: #D32F2F; border-color: #FFCDD2;" id="btnResetDefault">恢复 92+ 道预置名菜</button>
       </div>
     </section>
 
@@ -2515,6 +2625,170 @@
     // ==========================================
     // 0. 回到顶部浮标与饭店点菜模式业务逻辑
     // ==========================================
+    const STORAGE_KEY_ORDER_HISTORY = "chef_order_history_v1";
+    let orderHistory = [];
+
+    function initOrderHistory() {
+      const stored = localStorage.getItem(STORAGE_KEY_ORDER_HISTORY);
+      if (stored) {
+        try {
+          orderHistory = JSON.parse(stored);
+        } catch (e) {
+          orderHistory = [];
+        }
+      }
+      renderOrderHistory();
+    }
+
+    function saveOrderHistory() {
+      localStorage.setItem(STORAGE_KEY_ORDER_HISTORY, JSON.stringify(orderHistory));
+      renderOrderHistory();
+    }
+
+    function addOrderToHistory(order) {
+      if (!order || !order.items || order.items.length === 0) return;
+      // 检查是否已有相同 ID 的订单防重
+      if (order.id && orderHistory.some(o => o.id === order.id)) return;
+
+      orderHistory.unshift(order);
+      if (orderHistory.length > 50) orderHistory.pop(); // 最多保留50条
+      saveOrderHistory();
+    }
+
+    function renderOrderHistory() {
+      const listContainer = document.getElementById('orderHistoryList');
+      const countEl = document.getElementById('orderHistoryCount');
+      if (!listContainer) return;
+
+      if (countEl) countEl.textContent = orderHistory.length;
+
+      if (orderHistory.length === 0) {
+        listContainer.innerHTML = `
+          <div class="empty-state" style="padding: 20px 12px; margin-top: 4px;">
+            <div style="font-size: 32px; margin-bottom: 6px;">📜</div>
+            <p style="font-size: 13px; font-weight: 800;">暂无历史点餐记录</p>
+            <p style="font-size: 11px; color: var(--ink-light); margin-top: 4px;">在【点菜】中点击下单，或收到好友分享点单后，记录会自动保存在这里。</p>
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = '';
+      orderHistory.forEach((order, idx) => {
+        const isGuest = order.type === 'guest';
+        let totalQty = 0;
+        let totalMinutes = 0;
+        (order.items || []).forEach(it => {
+          totalQty += (it.qty || 1);
+          const r = recipes.find(item => item.id === it.id);
+          const m = r ? (r.timeMinutes || parseInt(r.time, 10) || 15) : 15;
+          totalMinutes += m * (it.qty || 1);
+        });
+
+        const card = document.createElement('div');
+        card.className = 'history-order-item';
+        card.innerHTML = `
+          <div class="history-order-header">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="stamp-seal" style="${isGuest ? 'border-color: #2E7D32; color: #2E7D32; background: rgba(46,125,50,0.06);' : ''}">
+                ${isGuest ? `好友来单 · ${order.customerName || '好友'}` : '本机自点'}
+              </span>
+              <span style="font-size: 11px; color: var(--ink-light); font-weight: 600;">${order.timestamp || ''}</span>
+            </div>
+            <button class="btn-del-history-item" data-idx="${idx}" title="删除此单">✕</button>
+          </div>
+
+          ${order.note ? `
+            <div style="font-size: 11px; color: #C0392B; background: #FDF2E9; border-radius: 6px; padding: 4px 8px; margin: 4px 0; font-weight: 600;">
+              💬 备注：${order.note}
+            </div>
+          ` : ''}
+
+          <div class="history-order-dishes">
+            ${(order.items || []).map(it => `
+              <div class="history-dish-chip" data-dish-id="${it.id}" title="点击查看菜谱">
+                <span>${it.cover || '🍲'}</span>
+                <span>${it.name}</span>
+                <span style="color: var(--primary); font-weight: 800;">x${it.qty || 1}</span>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="history-order-footer">
+            <span style="font-size: 11px; color: var(--ink-light); font-weight: 600;">
+              共 ${totalQty} 道 · 预计 ${totalMinutes} 分钟
+            </span>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn-history-action btn-copy-order" data-idx="${idx}">📋 复制</button>
+              <button class="btn-history-action btn-history-primary btn-reorder" data-idx="${idx}">🔄 再点此单</button>
+            </div>
+          </div>
+        `;
+
+        // 绑定删除单条记录
+        const delBtn = card.querySelector('.btn-del-history-item');
+        if (delBtn) {
+          delBtn.onclick = (e) => {
+            e.stopPropagation();
+            orderHistory.splice(idx, 1);
+            saveOrderHistory();
+          };
+        }
+
+        // 绑定点击菜品打开详情
+        card.querySelectorAll('.history-dish-chip').forEach(chip => {
+          chip.onclick = () => {
+            const rId = chip.dataset.dishId;
+            const r = recipes.find(item => item.id === rId);
+            if (r) openRecipeDetail(r);
+          };
+        });
+
+        // 绑定复制菜单
+        const copyBtn = card.querySelector('.btn-copy-order');
+        if (copyBtn) {
+          copyBtn.onclick = () => {
+            let text = `🏮【历史菜单 · ${isGuest ? `来自${order.customerName}` : '本机点餐'}】\n`;
+            text += `下单时间：${order.timestamp || ''}\n`;
+            if (order.note) text += `口味备注：${order.note}\n`;
+            (order.items || []).forEach((it, i) => {
+              text += `${i+1}. ${it.name} x${it.qty || 1}\n`;
+            });
+            text += `共 ${totalQty} 道菜，预计耗时 ${totalMinutes} 分钟。\n👩‍🍳 祝用餐愉快！`;
+
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(text).then(() => {
+                alert('✅ 菜单已复制到剪贴板，可发给微信好友！');
+              });
+            } else {
+              prompt('请复制菜单内容：', text);
+            }
+          };
+        }
+
+        // 绑定再来一单
+        const reorderBtn = card.querySelector('.btn-reorder');
+        if (reorderBtn) {
+          reorderBtn.onclick = () => {
+            (order.items || []).forEach(it => {
+              orderCart.set(it.id, it.qty || 1);
+            });
+            saveOrderCart();
+            alert(`✅ 已将该订单的 ${totalQty} 道菜品重新载入点餐台！`);
+            const orderModal = document.getElementById('orderModal');
+            if (orderModal) {
+              renderOrderCategories();
+              renderOrderMenuList();
+              orderModal.classList.add('active');
+              document.body.classList.add('modal-locked');
+            }
+          };
+        }
+
+        listContainer.appendChild(card);
+      });
+    }
+
     const STORAGE_KEY_ORDER_CART = "chef_order_cart_v1";
     let orderCart = new Map(); // recipeId -> quantity
     let activeOrderCategory = "全部";
@@ -2806,6 +3080,22 @@
         }
       });
       receiptList.innerHTML = html;
+      // 存入历史订单记录 (本机自点)
+      const selfItems = [];
+      orderCart.forEach((qty, id) => {
+        const r = recipes.find(item => item.id === id);
+        if (r) selfItems.push({ id: r.id, name: r.name, qty, cover: r.cover || '🍲', time: r.time || '15分钟' });
+      });
+      addOrderToHistory({
+        id: 'ord_self_' + Date.now(),
+        type: 'self',
+        customerName: '我',
+        timestamp: `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
+        note: '',
+        items: selfItems
+      });
+
+
 
       // 关键修复：打开小票时，阻断底层 orderModal 的手势穿透
       if (orderModal) {
@@ -2956,6 +3246,17 @@
         `;
       });
       document.getElementById('incomingOrderItemsList').innerHTML = html;
+      // 存入历史订单记录 (好友来单)
+      addOrderToHistory({
+        id: order.id || ('ord_guest_' + Date.now()),
+        type: 'guest',
+        customerName: order.customerName || '好友',
+        timestamp: order.timestamp || '',
+        note: order.note || '',
+        items: order.items
+      });
+
+
 
       // 打开弹窗并加锁
       document.getElementById('incomingOrderModal').classList.add('active');
@@ -3206,6 +3507,16 @@
         };
       }
 
+      initOrderHistory();
+      const clearHistoryBtn = document.getElementById('btnClearOrderHistory');
+      if (clearHistoryBtn) {
+        clearHistoryBtn.onclick = () => {
+          if (orderHistory.length > 0 && confirm('确认清空所有历史点餐记录吗？')) {
+            orderHistory = [];
+            saveOrderHistory();
+          }
+        };
+      }
       initBackToTop();
       initOrderCart();
       checkUrlOrderParams();
@@ -4352,7 +4663,8 @@
     // 9. 设置与数据备份、手机扫码
     // ==========================================
     document.getElementById('btnExportData').onclick = () => {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(recipes, null, 2));
+      const backupData = { recipes, favorites: Array.from(favorites), orderHistory };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
       downloadAnchor.setAttribute("download", `随身私房菜谱_备份_${new Date().toISOString().slice(0,10)}.json`);
@@ -4377,6 +4689,11 @@
             saveRecipes();
             renderRecipes();
             alert(`✅ 成功恢复 ${imported.length} 道菜谱！`);
+          } else if (imported && typeof imported === 'object') {
+            if (imported.recipes) { recipes = imported.recipes; saveRecipes(); renderRecipes(); }
+            if (imported.favorites) { favorites = new Set(imported.favorites); saveFavorites(); }
+            if (imported.orderHistory) { orderHistory = imported.orderHistory; saveOrderHistory(); }
+            alert('✅ 成功恢复菜谱及历史订单记录！');
           } else {
             alert('❌ 备份文件格式有误');
           }
