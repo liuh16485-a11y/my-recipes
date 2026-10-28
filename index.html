@@ -1565,7 +1565,381 @@
     .btn-secondary:hover {
       background: #FFE8A3;
     }
-  </style>
+  
+    /* 回到顶部手绘浮标按钮 */
+    .back-to-top-btn {
+      position: fixed;
+      right: 18px;
+      bottom: calc(var(--nav-height) + var(--safe-bottom) + 18px);
+      background: #FFE8A3;
+      border: var(--sketch-border);
+      box-shadow: var(--sketch-shadow);
+      border-radius: 50% 46% 52% 48% / 48% 52% 46% 50%;
+      width: 46px;
+      height: 46px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 95;
+      color: var(--ink);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(16px);
+      transition: opacity 0.25s ease, transform 0.25s ease, background 0.15s ease;
+      user-select: none;
+    }
+
+    .back-to-top-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .back-to-top-btn:hover {
+      background: #FFD97D;
+    }
+
+    .back-to-top-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0 0 0 var(--ink-border);
+    }
+
+    .back-top-arrow {
+      font-size: 13px;
+      line-height: 1;
+      margin-bottom: 2px;
+      font-weight: 900;
+    }
+
+    .back-top-text {
+      font-size: 9px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.5px;
+    }
+
+    /* 顶部右侧【点菜】功能按钮 */
+    .btn-order-menu {
+      background: #FFE8A3;
+      border: var(--sketch-border);
+      box-shadow: var(--sketch-shadow-sm);
+      border-radius: 12px 16px 14px 18px / 16px 14px 18px 12px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .btn-order-menu:hover {
+      background: #FFD56B;
+    }
+
+    .btn-order-menu:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0 0 0 var(--ink-border);
+    }
+
+    .order-badge {
+      background: #E25E3E;
+      color: #FFFFFF;
+      font-size: 10px;
+      font-weight: 900;
+      border-radius: 10px;
+      padding: 1px 6px;
+      border: 1px solid var(--ink-border);
+      line-height: 1.2;
+      display: inline-block;
+      margin-left: 2px;
+    }
+
+    /* 饭店点菜抽屉式大弹窗 */
+    .order-drawer {
+      width: 100%;
+      max-width: 560px;
+      height: 90vh;
+      background: var(--paper-warm);
+      border-top: 3px solid var(--ink-border);
+      border-left: 2px solid var(--ink-border);
+      border-right: 2px solid var(--ink-border);
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -8px 30px rgba(56, 43, 34, 0.25);
+      display: flex;
+      flex-direction: column;
+      animation: slideUpHanddrawn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .order-header-bar {
+      padding: 14px 16px;
+      background: var(--paper);
+      border-bottom: var(--sketch-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 22px 22px 0 0;
+    }
+
+    .order-header-title {
+      font-size: 17px;
+      font-weight: 900;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .order-header-sub {
+      font-size: 11px;
+      color: var(--ink-light);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* 点菜分类栏 */
+    .order-category-nav {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 14px;
+      background: #FAF3E6;
+      border-bottom: 1.5px dashed #DECDB8;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      flex-shrink: 0;
+    }
+
+    .order-category-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .order-cat-tab {
+      background: var(--paper);
+      border: 1.5px solid var(--ink-border);
+      box-shadow: 1.5px 1.5px 0 var(--ink-border);
+      border-radius: 10px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      font-family: inherit;
+    }
+
+    .order-cat-tab.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--ink-border);
+    }
+
+    /* 点菜菜单滚动列表 */
+    .order-menu-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px 80px 14px;
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* 饭店菜单菜品横向卡片 */
+    .menu-dish-card {
+      background: var(--paper);
+      border: var(--sketch-border);
+      box-shadow: var(--sketch-shadow-sm);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      position: relative;
+    }
+
+    .menu-dish-emoji-box {
+      width: 64px;
+      height: 64px;
+      background: #FFF3E3;
+      border: 1.5px solid var(--ink-border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      flex-shrink: 0;
+    }
+
+    .menu-dish-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .menu-dish-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .menu-dish-meta {
+      font-size: 11px;
+      color: var(--ink-light);
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .menu-dish-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    /* 点菜步进器与按钮 */
+    .menu-order-action {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .btn-add-dish {
+      background: #FFE8A3;
+      border: 1.5px solid var(--ink-border);
+      box-shadow: 1.5px 1.5px 0 var(--ink-border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ink);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.12s ease;
+      font-family: inherit;
+    }
+
+    .btn-add-dish:active {
+      transform: translate(1px, 1px);
+      box-shadow: 0 0 0 var(--ink-border);
+    }
+
+    .order-stepper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #FAF3E6;
+      border: 1.5px solid var(--ink-border);
+      border-radius: 8px;
+      padding: 3px 6px;
+    }
+
+    .btn-step {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid var(--ink-border);
+      background: #FFFFFF;
+      font-weight: 900;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--ink);
+    }
+
+    .btn-step:active {
+      transform: scale(0.9);
+    }
+
+    .step-qty {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--ink);
+      min-width: 20px;
+      text-align: center;
+    }
+
+    /* 底部悬浮点单小票结算条 */
+    .order-bottom-summary {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 253, 248, 0.98);
+      border-top: var(--sketch-border);
+      padding: 12px 16px calc(12px + var(--safe-bottom)) 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 -4px 15px rgba(56, 43, 34, 0.1);
+      z-index: 10;
+    }
+
+    .order-summary-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .order-total-count {
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    .order-total-meta {
+      font-size: 11px;
+      color: var(--ink-light);
+      font-weight: 600;
+    }
+
+    /* 手绘饭店今日菜单小票 */
+    .receipt-paper {
+      background: #FFFDF8;
+      border: 2px dashed var(--ink-border);
+      box-shadow: var(--sketch-shadow-lg);
+      border-radius: 12px;
+      padding: 22px 18px;
+      width: 90%;
+      max-width: 380px;
+      margin: auto;
+      text-align: left;
+      position: relative;
+      background-image: repeating-linear-gradient(#FFFDF8 0px, #FFFDF8 27px, #F0E6D6 28px);
+    }
+
+    .receipt-header-stamp {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      border: 2px solid #C0392B;
+      color: #C0392B;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transform: rotate(6deg);
+      user-select: none;
+    }
+
+</style>
 </head>
 <body>
 
@@ -1581,6 +1955,13 @@
           <h1 class="brand-title">随身私房菜谱</h1>
           <div class="brand-sub">离线美食厨房 · 食材智能匹配</div>
         </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-order-menu" id="btnOpenOrderModal" title="进入饭店点菜模式">
+          <span style="font-size: 15px;">🛎️</span>
+          <span>点菜</span>
+          <span class="order-badge" id="orderCartBadge" style="display: none;">0</span>
+        </button>
       </div>
     </header>
 
@@ -1790,6 +2171,12 @@
       </div>
     </section>
 
+    <!-- 菜谱库回到顶部手绘浮标 -->
+    <button class="back-to-top-btn" id="btnBackToTop" title="回到顶部">
+      <span class="back-top-arrow">▲</span>
+      <span class="back-top-text">顶部</span>
+    </button>
+
     <!-- 底部 Tab 导航 -->
     <nav class="bottom-nav">
       <div class="nav-item active" data-target="view-recipes">
@@ -1852,12 +2239,393 @@
     </div>
   </div>
 
+  <!-- 饭店点菜大抽屉 Modal -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="order-drawer">
+      <div class="order-header-bar">
+        <div>
+          <div class="order-header-title">🛎️ 今日私房点单台</div>
+          <div class="order-header-sub">仿饭店点菜模式 · 呈现已收藏的私房拿手菜</div>
+        </div>
+        <button class="btn-icon" id="btnCloseOrderModal">✕</button>
+      </div>
+
+      <!-- 点菜分类横滑栏 -->
+      <div class="order-category-nav" id="orderCategoryNav"></div>
+
+      <!-- 菜单菜品列表 -->
+      <div class="order-menu-list" id="orderMenuList"></div>
+
+      <!-- 底部小票结算条 -->
+      <div class="order-bottom-summary">
+        <div class="order-summary-text">
+          <span class="order-total-count" id="orderTotalCountText">已点 0 道美味佳肴</span>
+          <span class="order-total-meta" id="orderTotalMetaText">⏱️ 预计烹饪 0 分钟</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;" id="btnClearOrderCart">清空</button>
+          <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;" id="btnGenerateReceipt">👨‍🍳 下单生成菜单</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 今日手绘菜单小票 Receipt Modal -->
+  <div class="modal-overlay" id="receiptModal">
+    <div class="receipt-paper">
+      <div class="receipt-header-stamp">【主厨已接单】</div>
+      <h3 style="font-size: 18px; font-weight: 900; color: var(--ink); text-align: center; margin-bottom: 4px;">🏮 今日私房定制菜单</h3>
+      <div style="font-size: 11px; color: var(--ink-light); text-align: center; margin-bottom: 14px;" id="receiptTimestampText"></div>
+      
+      <div id="receiptItemsList" style="margin-bottom: 14px; font-size: 13px; font-weight: 600;"></div>
+      
+      <div style="background: #FAF3E6; border: 1px dashed #D6CABA; border-radius: 8px; padding: 10px; margin-bottom: 16px; font-size: 12px; color: var(--ink-light); line-height: 1.5;">
+        💡 <strong>主厨烹饪顺序建议：</strong><br>
+        先炖煲靓汤 ➔ 再焖煮硬菜 ➔ 备齐食材 ➔ 最后起火爆炒快手菜！
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary" style="flex: 1;" id="btnCopyMenuText">📋 复制菜单</button>
+        <button class="btn btn-primary" style="flex: 1;" id="btnCloseReceipt">我知道了</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 引入离线二维码库与预置菜谱数据 -->
   <script src="./qrcode.min.js"></script>
   <script src="./recipes_data.js"></script>
 
   <!-- 主业务逻辑 -->
   <script>
+    // ==========================================
+    // 0. 回到顶部浮标与饭店点菜模式业务逻辑
+    // ==========================================
+    const STORAGE_KEY_ORDER_CART = "chef_order_cart_v1";
+    let orderCart = new Map(); // recipeId -> quantity
+    let activeOrderCategory = "全部";
+
+    function initOrderCart() {
+      const stored = localStorage.getItem(STORAGE_KEY_ORDER_CART);
+      if (stored) {
+        try {
+          const list = JSON.parse(stored);
+          orderCart = new Map(list);
+        } catch (e) {}
+      }
+      updateOrderBadge();
+    }
+
+    function saveOrderCart() {
+      localStorage.setItem(STORAGE_KEY_ORDER_CART, JSON.stringify(Array.from(orderCart.entries())));
+      updateOrderBadge();
+    }
+
+    function updateOrderBadge() {
+      const badge = document.getElementById('orderCartBadge');
+      if (!badge) return;
+      let totalQty = 0;
+      orderCart.forEach(qty => totalQty += qty);
+      if (totalQty > 0) {
+        badge.textContent = totalQty;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // 初始化回到顶部按钮
+    function initBackToTop() {
+      const btn = document.getElementById('btnBackToTop');
+      if (!btn) return;
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 260) {
+          btn.classList.add('visible');
+        } else {
+          btn.classList.remove('visible');
+        }
+      }, { passive: true });
+
+      btn.onclick = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        playBeep(700, 0.05);
+      };
+    }
+
+    // 渲染饭店点菜分类导航
+    function renderOrderCategories() {
+      const nav = document.getElementById('orderCategoryNav');
+      if (!nav) return;
+      nav.innerHTML = '';
+
+      // 获取所有已收藏菜品的分类
+      const favRecipes = recipes.filter(r => favorites.has(r.id));
+      const categories = ["全部", "家常小炒", "硬菜大餐", "快手减脂", "营养靓汤", "懒人主食", "烘焙甜品"];
+
+      categories.forEach(cat => {
+        const count = cat === "全部" ? favRecipes.length : favRecipes.filter(r => r.category === cat).length;
+        const btn = document.createElement('button');
+        btn.className = 'order-cat-tab' + (activeOrderCategory === cat ? ' active' : '');
+        btn.textContent = `${cat} (${count})`;
+        btn.onclick = () => {
+          activeOrderCategory = cat;
+          renderOrderCategories();
+          renderOrderMenuList();
+          playBeep(650, 0.03);
+        };
+        nav.appendChild(btn);
+      });
+    }
+
+    // 渲染点菜菜单列表（只显示已收藏的菜品）
+    function renderOrderMenuList() {
+      const listContainer = document.getElementById('orderMenuList');
+      if (!listContainer) return;
+      listContainer.innerHTML = '';
+
+      // 1. 过滤已收藏的菜品
+      const favRecipes = recipes.filter(r => favorites.has(r.id));
+
+      if (favRecipes.length === 0) {
+        listContainer.innerHTML = `
+          <div class="empty-state" style="padding: 30px 16px;">
+            <div class="empty-state-icon">🍽️</div>
+            <p style="font-weight: 800; font-size: 16px;">您的私房菜单还是空的哦</p>
+            <p style="font-size: 12px; margin-top: 6px; color: var(--ink-light); line-height: 1.6;">
+              【饭店点菜模式】专门呈现您的专属拿手好菜！<br>
+              请先在菜谱库中点击红心 <strong>❤️ 收藏</strong> 您喜爱的菜品，它们就会自动出现在这里供您点餐。
+            </p>
+            <button class="btn btn-primary" style="margin-top: 14px;" id="btnGoExploreFavs">👉 去菜谱库挑选好菜</button>
+          </div>
+        `;
+        const goBtn = document.getElementById('btnGoExploreFavs');
+        if (goBtn) {
+          goBtn.onclick = () => {
+            document.getElementById('orderModal').classList.remove('active');
+            switchTab('view-recipes');
+          };
+        }
+        updateOrderSummaryBar();
+        return;
+      }
+
+      // 2. 根据选中的分类过滤
+      const filtered = activeOrderCategory === "全部" 
+        ? favRecipes 
+        : favRecipes.filter(r => r.category === activeOrderCategory);
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `
+          <div class="empty-state" style="padding: 26px 16px;">
+            <div class="empty-state-icon">📂</div>
+            <p style="font-weight: 800; font-size: 15px;">该分类下暂无已收藏的菜品</p>
+            <p style="font-size: 12px; margin-top: 4px; color: var(--ink-light);">去菜谱库多收藏几道【${activeOrderCategory}】吧！</p>
+          </div>
+        `;
+        updateOrderSummaryBar();
+        return;
+      }
+
+      // 3. 渲染菜品行
+      filtered.forEach(recipe => {
+        const qty = orderCart.get(recipe.id) || 0;
+        const card = document.createElement('div');
+        card.className = 'menu-dish-card';
+        card.innerHTML = `
+          <div class="menu-dish-emoji-box">${recipe.cover || '🍲'}</div>
+          <div class="menu-dish-info">
+            <div class="menu-dish-name">${recipe.name}</div>
+            <div class="menu-dish-meta">
+              <span>⏱️ ${recipe.time || '15分钟'}</span>
+              <span style="color: var(--primary);">${'★'.repeat(recipe.difficulty || 1)}</span>
+              <span>🔥 ${recipe.calories || '~300 kcal'}</span>
+            </div>
+            <div class="menu-dish-tags">
+              ${(recipe.tags || []).slice(0, 2).map(t => `<span class="ing-tag">${t}</span>`).join('')}
+            </div>
+          </div>
+          <div class="menu-order-action">
+            ${qty > 0 ? `
+              <div class="order-stepper">
+                <button class="btn-step btn-minus" data-id="${recipe.id}">-</button>
+                <span class="step-qty">${qty}</span>
+                <button class="btn-step btn-plus" data-id="${recipe.id}">+</button>
+              </div>
+            ` : `
+              <button class="btn-add-dish" data-id="${recipe.id}">
+                <span>+</span> 点这道菜
+              </button>
+            `}
+          </div>
+        `;
+
+        // 点击卡片本体可直接查看详情
+        card.onclick = (e) => {
+          if (e.target.closest('.menu-order-action')) return;
+          openRecipeDetail(recipe);
+        };
+
+        // 绑定加菜/减菜事件
+        const addBtn = card.querySelector('.btn-add-dish');
+        if (addBtn) {
+          addBtn.onclick = (e) => {
+            e.stopPropagation();
+            changeOrderQty(recipe.id, 1);
+          };
+        }
+
+        const plusBtn = card.querySelector('.btn-plus');
+        if (plusBtn) {
+          plusBtn.onclick = (e) => {
+            e.stopPropagation();
+            changeOrderQty(recipe.id, 1);
+          };
+        }
+
+        const minusBtn = card.querySelector('.btn-minus');
+        if (minusBtn) {
+          minusBtn.onclick = (e) => {
+            e.stopPropagation();
+            changeOrderQty(recipe.id, -1);
+          };
+        }
+
+        listContainer.appendChild(card);
+      });
+
+      updateOrderSummaryBar();
+    }
+
+    function changeOrderQty(recipeId, delta) {
+      const current = orderCart.get(recipeId) || 0;
+      const next = current + delta;
+      if (next > 0) {
+        orderCart.set(recipeId, next);
+        playBeep(700, 0.04);
+      } else {
+        orderCart.delete(recipeId);
+        playBeep(500, 0.04);
+      }
+      saveOrderCart();
+      renderOrderMenuList();
+    }
+
+    function updateOrderSummaryBar() {
+      let totalDishes = 0;
+      let totalMinutes = 0;
+      orderCart.forEach((qty, id) => {
+        totalDishes += qty;
+        const r = recipes.find(item => item.id === id);
+        if (r) {
+          const m = r.timeMinutes || parseInt(r.time, 10) || 15;
+          totalMinutes += m * qty;
+        }
+      });
+
+      const countEl = document.getElementById('orderTotalCountText');
+      const metaEl = document.getElementById('orderTotalMetaText');
+      if (countEl) countEl.textContent = `已点 ${totalDishes} 道美味佳肴`;
+      if (metaEl) metaEl.textContent = `⏱️ 预计烹饪约 ${totalMinutes} 分钟`;
+    }
+
+    // 生成菜单小票
+    function showOrderReceipt() {
+      if (orderCart.size === 0) {
+        alert('您还没有点任何菜品哦，请先在菜单中挑选几道心仪好菜吧！');
+        return;
+      }
+
+      const receiptList = document.getElementById('receiptItemsList');
+      const timeEl = document.getElementById('receiptTimestampText');
+      const now = new Date();
+      timeEl.textContent = `下单时间：${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+      let html = '';
+      let index = 1;
+      orderCart.forEach((qty, id) => {
+        const r = recipes.find(item => item.id === id);
+        if (r) {
+          html += `
+            <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #E5D8C5;">
+              <span>${index++}. ${r.cover || '🍲'} ${r.name}</span>
+              <span style="color: var(--primary); font-weight: 800;">x ${qty} 份 (${r.time || '15分钟'})</span>
+            </div>
+          `;
+        }
+      });
+      receiptList.innerHTML = html;
+
+      document.getElementById('receiptModal').classList.add('active');
+      playWinSound();
+      triggerConfetti();
+    }
+
+    // 绑定点菜与回到顶部事件
+    function bindOrderEvents() {
+      const openBtn = document.getElementById('btnOpenOrderModal');
+      const closeBtn = document.getElementById('btnCloseOrderModal');
+      const modal = document.getElementById('orderModal');
+
+      if (openBtn) {
+        openBtn.onclick = () => {
+          renderOrderCategories();
+          renderOrderMenuList();
+          modal.classList.add('active');
+          playBeep(650, 0.05);
+        };
+      }
+
+      if (closeBtn) {
+        closeBtn.onclick = () => modal.classList.remove('active');
+      }
+
+      const clearBtn = document.getElementById('btnClearOrderCart');
+      if (clearBtn) {
+        clearBtn.onclick = () => {
+          if (orderCart.size > 0 && confirm('确认清空当前已点的所有菜品吗？')) {
+            orderCart.clear();
+            saveOrderCart();
+            renderOrderMenuList();
+          }
+        };
+      }
+
+      const genBtn = document.getElementById('btnGenerateReceipt');
+      if (genBtn) {
+        genBtn.onclick = showOrderReceipt;
+      }
+
+      const closeReceiptBtn = document.getElementById('btnCloseReceipt');
+      if (closeReceiptBtn) {
+        closeReceiptBtn.onclick = () => {
+          document.getElementById('receiptModal').classList.remove('active');
+        };
+      }
+
+      const copyMenuBtn = document.getElementById('btnCopyMenuText');
+      if (copyMenuBtn) {
+        copyMenuBtn.onclick = () => {
+          let text = '🏮【今日私房定制菜单】\n';
+          let idx = 1;
+          orderCart.forEach((qty, id) => {
+            const r = recipes.find(item => item.id === id);
+            if (r) text += `${idx++}. ${r.name} (${qty}份)\n`;
+          });
+          text += '\n👩‍🍳 祝用餐愉快！';
+
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+              alert('✅ 今日菜单文本已复制到剪贴板，可直接发到微信群或家庭群！');
+            });
+          } else {
+            alert(text);
+          }
+        };
+      }
+
+      initBackToTop();
+      initOrderCart();
+    }
+
     // ==========================================
     // 1. 数据持久化管理 (LocalStorage)
     // ==========================================
@@ -3166,6 +3934,7 @@
     // ==========================================
     window.addEventListener('DOMContentLoaded', () => {
       initData();
+      bindOrderEvents();
       renderRecipes();
       initCreateForm();
       initWheelData();
