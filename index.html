@@ -82,6 +82,9 @@
       justify-content: center;
       padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 20px);
       overflow-x: hidden;
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
     }
 
     /* 主应用容器，手绘料理手账本外框 */
@@ -96,6 +99,16 @@
       position: relative;
       display: flex;
       flex-direction: column;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
+
+    @media (max-width: 560px) {
+      .app-container {
+        border-left: none;
+        border-right: none;
+        box-shadow: none;
+      }
     }
 
     /* 顶部导航头：木质料理台/手绘便签夹质感 */
@@ -189,8 +202,12 @@
     /* 视图容器与 Tab 切换 */
     .tab-content {
       display: none;
-      padding: 16px;
+      padding: 14px 12px;
       flex: 1;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow-x: hidden;
       animation: fadeInHanddrawn 0.25s ease-out;
     }
 
@@ -336,25 +353,21 @@
       box-shadow: 0 0 0 var(--ink-border);
     }
 
-    /* 菜谱卡片网格列表 */
+    /* 菜谱卡片网格列表 (完美适配移动端屏幕) */
     .recipe-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
       margin-top: 4px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
-    @media (max-width: 360px) {
-      .recipe-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* 手绘风菜谱卡片 */
+    /* 手绘风菜谱卡片 (防溢出适配) */
     .recipe-card {
       background: var(--paper-warm);
       border: var(--sketch-border);
-      box-shadow: var(--sketch-shadow);
+      box-shadow: var(--sketch-shadow-sm);
       border-radius: var(--sketch-radius);
       overflow: visible;
       cursor: pointer;
@@ -363,6 +376,9 @@
       position: relative;
       transition: transform 0.18s ease, box-shadow 0.18s ease;
       margin-top: 6px;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     /* 卡片顶部和纸胶带装饰 */
@@ -493,7 +509,7 @@
     }
 
     .recipe-card-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       color: var(--ink);
       display: flex;
@@ -502,6 +518,22 @@
       gap: 4px;
       margin-bottom: 6px;
       line-height: 1.35;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .recipe-card-title > span:first-child {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .recipe-card-title .stamp-seal {
+      flex-shrink: 0;
+      padding: 1px 4px;
+      font-size: 10px;
     }
 
     .recipe-card-meta {
@@ -519,6 +551,8 @@
       flex-wrap: wrap;
       gap: 4px;
       margin-top: auto;
+      overflow: hidden;
+      max-height: 22px;
     }
 
     .ing-tag {
@@ -526,9 +560,13 @@
       border: 1px solid var(--ink-border);
       color: var(--ink);
       font-size: 10px;
-      padding: 2px 6px;
+      padding: 1px 5px;
       border-radius: 4px;
       font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 58px;
     }
 
     .missing-tag {
@@ -1544,9 +1582,6 @@
           <div class="brand-sub">离线美食厨房 · 食材智能匹配</div>
         </div>
       </div>
-      <div class="header-actions">
-        <button class="btn-icon" id="btnShowMobileQR" title="扫码在手机上打开">📱</button>
-      </div>
     </header>
 
     <!-- 视图 1：菜谱精选 (Catalog) -->
@@ -1561,13 +1596,13 @@
       <!-- 分类横滑栏 -->
       <div class="category-scroll" id="categoryScroll">
         <button class="cat-pill active" data-cat="全部">全部</button>
+        <button class="cat-pill" data-cat="❤️ 我的收藏">❤️ 我的收藏</button>
         <button class="cat-pill" data-cat="家常小炒">家常小炒</button>
         <button class="cat-pill" data-cat="硬菜大餐">硬菜大餐</button>
         <button class="cat-pill" data-cat="快手减脂">快手减脂</button>
         <button class="cat-pill" data-cat="营养靓汤">营养靓汤</button>
         <button class="cat-pill" data-cat="懒人主食">懒人主食</button>
         <button class="cat-pill" data-cat="烘焙甜品">烘焙甜品</button>
-        <button class="cat-pill" data-cat="❤️ 我的收藏">❤️ 收藏</button>
       </div>
 
       <!-- 菜谱卡片列表 -->
@@ -1732,17 +1767,7 @@
         <span>离线功能已就绪 · 本地存储安全运行</span>
       </div>
 
-      <div class="settings-card">
-        <div class="settings-title">📱 手机访问与添加到桌面</div>
-        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 10px;">
-          在手机上像使用原生 APP 一样享受顺滑离线体验：
-        </p>
-        <ul style="font-size: 13px; color: var(--text); padding-left: 18px; line-height: 1.8;">
-          <li><strong>苹果 iPhone (Safari)</strong>: 点击底部中间分享按钮 ➔ 选择<strong>「添加到主屏幕」</strong>。</li>
-          <li><strong>安卓手机 (Chrome/自带浏览器)</strong>: 点击右上角菜单 ➔ 选择<strong>「安装应用」或「添加至主屏幕」</strong>。</li>
-        </ul>
-        <button class="btn btn-secondary" style="width: 100%; margin-top: 12px;" id="btnOpenQRDialog">展示手机局域网扫码窗口</button>
-      </div>
+
 
       <div class="settings-card">
         <div class="settings-title">💾 数据备份与跨设备迁移</div>
@@ -3061,10 +3086,14 @@
       modal.classList.add('active');
     }
 
-    document.getElementById('btnShowMobileQR').onclick = () => showQRCodeModal();
-    document.getElementById('btnOpenQRDialog').onclick = () => showQRCodeModal();
-    document.getElementById('btnCloseQR').onclick = () => {
-      document.getElementById('qrModal').classList.remove('active');
+    const btnShowQR = document.getElementById('btnShowMobileQR');
+    if (btnShowQR) btnShowQR.onclick = () => showQRCodeModal();
+    const btnOpenQR = document.getElementById('btnOpenQRDialog');
+    if (btnOpenQR) btnOpenQR.onclick = () => showQRCodeModal();
+    const btnCloseQR = document.getElementById('btnCloseQR');
+    if (btnCloseQR) btnCloseQR.onclick = () => {
+      const modal = document.getElementById('qrModal');
+      if (modal) modal.classList.remove('active');
     };
     document.getElementById('btnCloseDetail').onclick = () => {
       document.getElementById('recipeDetailModal').classList.remove('active');
