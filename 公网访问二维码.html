@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>扫码在苹果手机上打开私房菜谱</title>
+  <script src="./qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #F4EFE6;
+      color: #382B22;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .card {
+      background: #FFFDF8;
+      border: 2px solid #382B22;
+      box-shadow: 4px 4px 0px #382B22;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 420px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    p {
+      font-size: 14px;
+      color: #6E5C4E;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    #qrcode {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    #qrcode img {
+      border: 2px solid #382B22;
+      box-shadow: 2px 2px 0px #382B22;
+      border-radius: 12px;
+      padding: 10px;
+      background: #FFF;
+    }
+    .url-box {
+      background: #FAF5EA;
+      border: 1.5px dashed #382B22;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-family: monospace;
+      color: #E25E3E;
+      font-weight: bold;
+      word-break: break-all;
+      margin-bottom: 16px;
+    }
+    .tip {
+      font-size: 12px;
+      color: #713F12;
+      background: #FEF9C3;
+      border: 1px solid #CA8A04;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: left;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>📱 苹果手机扫码直达</h1>
+    <p>打开 iPhone 自带<strong>「相机」</strong>或<strong>「微信扫一扫」</strong>对准下方二维码，即可直接打开！</p>
+    
+    <div id="qrcode"></div>
+    
+    <div class="url-box" id="urlText">https://liuh16485-a11y.github.io/my-recipes/</div>
+
+    <div class="tip">
+      <strong>💡 提示：</strong><br>
+      刚才报 404 是因为手动输入时容易遗漏最后的 <code>/my-recipes/</code>（如果只输到 github.io 就会 404），或者 <code>a11y</code>（数字1与字母l）容易输错。用手机扫码 100% 准确直接打开！
+    </div>
+  </div>
+
+  <script>
+    const targetUrl = "https://liuh16485-a11y.github.io/my-recipes/";
+    new QRCode(document.getElementById("qrcode"), {
+      text: targetUrl,
+      width: 220,
+      height: 220,
+      colorDark : "#382B22",
+      colorLight : "#FFFFFF",
+      correctLevel : QRCode.CorrectLevel.H
+    });
+  </script>
+</body>
+</html>
