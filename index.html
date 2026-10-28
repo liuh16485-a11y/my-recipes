@@ -1648,6 +1648,12 @@
       margin-top: 8px;
     }
 
+    
+    /* 多层弹窗 z-index 层级保障 (避免底层遮挡) */
+    #shareMenuModal, #guestConfirmModal, #incomingOrderModal, #receiptModal {
+      z-index: 350 !important;
+    }
+
     /* 回到顶部手绘浮标按钮 */
     .back-to-top-btn {
       position: fixed;
@@ -2386,7 +2392,7 @@
           <div class="order-header-sub" id="orderHeaderSubTitle">仿饭店点菜模式 · 呈现已收藏的私房拿手菜</div>
         </div>
         <div style="display: flex; gap: 6px; align-items: center;">
-          <button class="btn-share-menu" id="btnShareOrderMenu" title="把菜单分享给他人点菜">
+          <button class="btn-share-menu" id="btnShareOrderMenu" onclick="openShareMenuModal()" title="把菜单分享给他人点菜">
             <span>📤</span>
             <span>分享点单</span>
           </button>
@@ -2814,54 +2820,71 @@
 
     // 主厨开启点单共享房间，监听好友下单
     function openShareMenuModal() {
-      const favRecipes = recipes.filter(r => favorites.has(r.id));
+      // 1. 获取要分享的菜品（优先取收藏，若未收藏则精选推荐名菜）
+      let favRecipes = recipes.filter(r => favorites.has(r.id));
       if (favRecipes.length === 0) {
-        alert('请先在菜谱库中点击红心 ❤️ 收藏几道您的拿手好菜，再分享菜单给好友点餐哦！');
-        return;
+        favRecipes = recipes.slice(0, 16);
       }
 
-      // 生成或复用当前桌号频道
+      // 2. 立即打开弹窗并锁定底层
+      const modal = document.getElementById('shareMenuModal');
+      const orderModal = document.getElementById('orderModal');
+      if (orderModal) {
+        orderModal.style.pointerEvents = 'none';
+      }
+      if (modal) {
+        modal.classList.add('active');
+      }
+      document.body.classList.add('modal-locked');
+      playBeep(750, 0.05);
+
+      // 3. 生成或复用当前桌号频道
       if (!currentTableId) {
         currentTableId = 'chef_' + Math.random().toString(36).substring(2, 8);
       }
 
-      // 生成分享链接（带桌号与主厨收藏菜品 ID 列表）
+      // 生成分享链接
       const favIds = favRecipes.map(r => r.id).join(',');
       const baseUrl = window.location.origin + window.location.pathname;
       const shareUrl = `${baseUrl}?table=${currentTableId}&favs=${favIds}`;
 
-      // 渲染二维码
+      // 4. 渲染二维码 (防抛异常保护)
       const qrBox = document.getElementById('shareQrOutput');
-      qrBox.innerHTML = '';
-      if (window.QRCode) {
-        new QRCode(qrBox, {
-          text: shareUrl,
-          width: 170,
-          height: 170,
-          colorDark: "#382B22",
-          colorLight: "#FFFFFF",
-          correctLevel: 2
-        });
+      if (qrBox) {
+        qrBox.innerHTML = '';
+        try {
+          if (window.QRCode) {
+            new QRCode(qrBox, {
+              text: shareUrl,
+              width: 170,
+              height: 170,
+              colorDark: "#382B22",
+              colorLight: "#FFFFFF",
+              correctLevel: 1
+            });
+          }
+        } catch (e) {
+          console.warn('QR Code generation notice:', e);
+        }
       }
 
-      // 绑定复制按钮
-      document.getElementById('btnCopyShareLink').onclick = () => {
-        const text = `🍽️ 这是我的私房菜单，快来点你想吃的菜吧！点击进入点餐：\n${shareUrl}`;
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(text).then(() => {
-            alert('✅ 点菜链接已复制！可直接发到微信群或好友聊天中！');
-          });
-        } else {
-          prompt('请长按复制下方点菜链接发给好友：', text);
-        }
-      };
+      // 5. 绑定复制按钮
+      const copyBtn = document.getElementById('btnCopyShareLink');
+      if (copyBtn) {
+        copyBtn.onclick = () => {
+          const text = `🍽️ 这是我的私房菜单，快来点你想吃的菜吧！点击进入点餐：\n${shareUrl}`;
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+              alert('✅ 点菜链接已复制！可直接发到微信群或好友聊天中！');
+            });
+          } else {
+            prompt('请长按复制下方点菜链接发给好友：', text);
+          }
+        };
+      }
 
-      // 开启实时监听好友点单
+      // 6. 开启实时监听好友点单
       startListeningOrders(currentTableId);
-
-      document.getElementById('shareMenuModal').classList.add('active');
-      document.body.classList.add('modal-locked');
-      playBeep(750, 0.05);
     }
 
     // 实时监听来自好友的下单推送 (通过 ntfy.sh 免费极速 Pub/Sub)
@@ -3139,7 +3162,11 @@
       if (closeShareBtn) {
         closeShareBtn.onclick = () => {
           document.getElementById('shareMenuModal').classList.remove('active');
-          if (!modal || !modal.classList.contains('active')) {
+          const orderModal = document.getElementById('orderModal');
+          if (orderModal) {
+            orderModal.style.pointerEvents = '';
+          }
+          if (!orderModal || !orderModal.classList.contains('active')) {
             document.body.classList.remove('modal-locked');
           }
         };
