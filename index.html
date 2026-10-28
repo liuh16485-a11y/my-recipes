@@ -1844,6 +1844,76 @@
       margin-left: 2px;
     }
 
+    /* 顾客分享点单专属锁定模式：彻底隐藏前一层页面与所有无关元素，限制只能进行点菜和下单 */
+    body.is-guest-mode {
+      overflow: hidden !important;
+      position: fixed !important;
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+    body.is-guest-mode .app-header,
+    body.is-guest-mode .tab-nav,
+    body.is-guest-mode .bottom-nav,
+    body.is-guest-mode #backToTopBtn,
+    body.is-guest-mode #pantryFab,
+    body.is-guest-mode #app-view-container,
+    body.is-guest-mode .view-section,
+    body.is-guest-mode #btnCloseOrderModal,
+    body.is-guest-mode #btnShareOrderMenu {
+      display: none !important;
+    }
+    body.is-guest-mode #orderModal {
+      display: flex !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      max-height: 100dvh !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      z-index: 1000 !important;
+      background: var(--paper-warm) !important;
+      align-items: stretch !important;
+      justify-content: stretch !important;
+    }
+    body.is-guest-mode #orderModal .order-drawer {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      max-height: 100vh !important;
+      max-height: 100dvh !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+      display: flex !important;
+      flex-direction: column !important;
+      animation: none !important;
+    }
+    body.is-guest-mode .order-header-bar {
+      border-radius: 0 !important;
+      padding: 14px 16px;
+    }
+    body.is-guest-mode .guest-mode-badge {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #2E7D32;
+      background: #E8F5E9;
+      border: 1.5px solid #A5D6A7;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+
     /* 饭店点菜抽屉式大弹窗 (防穿透与全屏自适应) */
     .order-drawer {
       width: 100%;
@@ -2498,10 +2568,14 @@
     <div class="order-drawer">
       <div class="order-header-bar">
         <div>
-          <div class="order-header-title">🛎️ 今日私房点单台</div>
+          <div class="order-header-title">
+            <span>🛎️ 今日私房点单台</span>
+            <span class="guest-mode-badge" style="display: none;">宾客点单模式</span>
+          </div>
           <div class="order-header-sub" id="orderHeaderSubTitle">仿饭店点菜模式 · 呈现已收藏的私房拿手菜</div>
         </div>
         <div style="display: flex; gap: 6px; align-items: center;">
+          <span class="guest-mode-badge" style="display: none;">🍽️ 选好请下单</span>
           <button class="btn-share-menu" id="btnShareOrderMenu" onclick="openShareMenuModal()" title="把菜单分享给他人点菜">
             <span>📤</span>
             <span>分享点单</span>
@@ -2889,23 +2963,35 @@
       const favRecipes = recipes.filter(r => activeFavSet.has(r.id));
 
       if (favRecipes.length === 0) {
-        listContainer.innerHTML = `
-          <div class="empty-state" style="padding: 26px 12px; margin-top: 20px;">
-            <div class="empty-state-icon">🍽️</div>
-            <p style="font-weight: 800; font-size: 15px;">私房菜单还是空的哦</p>
-            <p style="font-size: 12px; margin-top: 6px; color: var(--ink-light); line-height: 1.5;">
-              【饭店点菜模式】只呈现您的收藏好菜！请先在菜谱库点击红心 <strong>❤️ 收藏</strong> 喜欢的菜品。
-            </p>
-            <button class="btn btn-primary" style="margin-top: 14px; font-size: 12px;" id="btnGoExploreFavs">👉 去挑选收藏菜品</button>
-          </div>
-        `;
-        const goBtn = document.getElementById('btnGoExploreFavs');
-        if (goBtn) {
-          goBtn.onclick = () => {
-            document.getElementById('orderModal').classList.remove('active');
-            document.body.classList.remove('modal-locked');
-            switchTab('view-recipes');
-          };
+        if (isGuestMode) {
+          listContainer.innerHTML = `
+            <div class="empty-state" style="padding: 36px 16px; margin-top: 30px;">
+              <div class="empty-state-icon">👨‍🍳</div>
+              <p style="font-weight: 800; font-size: 16px; color: var(--ink);">主厨正在备菜中</p>
+              <p style="font-size: 13px; margin-top: 8px; color: var(--ink-light); line-height: 1.6;">
+                大厨分享的私房菜单正在准备中，请稍候或联系大厨为您开单！
+              </p>
+            </div>
+          `;
+        } else {
+          listContainer.innerHTML = `
+            <div class="empty-state" style="padding: 26px 12px; margin-top: 20px;">
+              <div class="empty-state-icon">🍽️</div>
+              <p style="font-weight: 800; font-size: 15px;">私房菜单还是空的哦</p>
+              <p style="font-size: 12px; margin-top: 6px; color: var(--ink-light); line-height: 1.5;">
+                【饭店点菜模式】只呈现您的收藏好菜！请先在菜谱库点击红心 <strong>❤️ 收藏</strong> 喜欢的菜品。
+              </p>
+              <button class="btn btn-primary" style="margin-top: 14px; font-size: 12px;" id="btnGoExploreFavs">👉 去挑选收藏菜品</button>
+            </div>
+          `;
+          const goBtn = document.getElementById('btnGoExploreFavs');
+          if (goBtn) {
+            goBtn.onclick = () => {
+              document.getElementById('orderModal').classList.remove('active');
+              document.body.classList.remove('modal-locked');
+              switchTab('view-recipes');
+            };
+          }
         }
         updateOrderSummaryBar();
         return;
@@ -2921,7 +3007,7 @@
       groupHeader.className = 'order-group-title';
       groupHeader.innerHTML = `
         <span>📌 ${activeOrderCategory} (${filtered.length})</span>
-        <span style="font-size: 10px; font-weight: normal; color: var(--ink-light);">取自我的收藏</span>
+        <span style="font-size: 10px; font-weight: normal; color: var(--ink-light);">${isGuestMode ? '主厨拿手私房菜' : '取自我的收藏'}</span>
       `;
       listContainer.appendChild(groupHeader);
 
@@ -2971,9 +3057,13 @@
           </div>
         `;
 
-        // 点击菜品卡片直接查看详情
+        // 点击菜品卡片：顾客模式限制只能点菜和下单，点击卡片直接快速加菜 1 份
         card.onclick = (e) => {
           if (e.target.closest('.menu-order-action')) return;
+          if (isGuestMode) {
+            changeOrderQty(recipe.id, 1);
+            return;
+          }
           openRecipeDetail(recipe);
         };
 
@@ -3334,31 +3424,52 @@
 
     // 检查并解析 URL 参数 (处理顾客扫码点餐与订单分享导入)
     function checkUrlOrderParams() {
-      const params = new URLSearchParams(window.location.search);
+      const searchStr = window.location.search || (window.location.hash.includes('?') ? window.location.hash.substring(window.location.hash.indexOf('?')) : '');
+      const params = new URLSearchParams(searchStr);
       const table = params.get('table');
       const favs = params.get('favs');
       const order = params.get('order');
       const from = params.get('from');
 
-      // 1. 如果带有 table 参数，说明是好友点击了点餐链接进入顾客点餐模式
+      // 1. 如果带有 table 参数，说明是好友点击了点餐链接进入顾客点餐模式 (严格锁定，不可返回或关闭)
       if (table) {
         isGuestMode = true;
         currentTableId = table;
+        document.body.classList.add('is-guest-mode');
+        document.body.classList.add('modal-locked');
+
         if (favs) {
           guestFavsSet = new Set(favs.split(','));
         }
 
-        setTimeout(() => {
-          const subTitle = document.getElementById('orderHeaderSubTitle');
-          if (subTitle) subTitle.textContent = '🌟 欢迎点餐！主厨已为您备好私房菜单，选好请点【下单】';
-          const shareBtn = document.getElementById('btnShareOrderMenu');
-          if (shareBtn) shareBtn.style.display = 'none';
+        // 拦截并锁定移动端返回操作，禁止退出点餐页面
+        try {
+          history.pushState({ page: 'guest_order' }, '', window.location.href);
+          window.addEventListener('popstate', () => {
+            if (isGuestMode) {
+              history.pushState({ page: 'guest_order' }, '', window.location.href);
+              const om = document.getElementById('orderModal');
+              if (om) om.classList.add('active');
+              document.body.classList.add('is-guest-mode');
+              document.body.classList.add('modal-locked');
+            }
+          });
+        } catch (e) {}
 
-          renderOrderCategories();
-          renderOrderMenuList();
-          document.getElementById('orderModal').classList.add('active');
-          document.body.classList.add('modal-locked');
-        }, 300);
+        const subTitle = document.getElementById('orderHeaderSubTitle');
+        if (subTitle) subTitle.textContent = '🌟 欢迎点餐！大厨已备好私房佳肴，挑选好后请点右下角【下单】';
+        const shareBtn = document.getElementById('btnShareOrderMenu');
+        if (shareBtn) shareBtn.style.display = 'none';
+        const closeBtn = document.getElementById('btnCloseOrderModal');
+        if (closeBtn) closeBtn.style.display = 'none';
+
+        renderOrderCategories();
+        renderOrderMenuList();
+
+        const orderModal = document.getElementById('orderModal');
+        if (orderModal) {
+          orderModal.classList.add('active');
+        }
       }
 
       // 2. 如果带有直接订单参数
@@ -3385,6 +3496,7 @@
       if (openBtn) {
         openBtn.onclick = () => {
           isGuestMode = false;
+          document.body.classList.remove('is-guest-mode');
           renderOrderCategories();
           renderOrderMenuList();
           modal.classList.add('active');
@@ -3394,6 +3506,7 @@
       }
 
       function closeModal() {
+        if (isGuestMode) return; // 顾客模式下禁止关闭点菜页面返回前一层
         if (modal) modal.classList.remove('active');
         document.body.classList.remove('modal-locked');
       }
@@ -3401,6 +3514,7 @@
       if (closeBtn) closeBtn.onclick = closeModal;
 
       modal.onclick = (e) => {
+        if (isGuestMode) return; // 顾客模式下禁止点击背景关闭
         if (e.target === modal) closeModal();
       };
 
