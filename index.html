@@ -1651,7 +1651,7 @@
     
     /* 多层弹窗 z-index 层级保障 (避免底层遮挡) */
     #shareMenuModal, #guestConfirmModal, #incomingOrderModal, #receiptModal {
-      z-index: 350 !important;
+      z-index: 3500 !important;
     }
 
     
@@ -1912,6 +1912,14 @@
       border: 1.5px solid #A5D6A7;
       padding: 3px 8px;
       border-radius: 12px;
+    }
+    body.is-guest-mode #guestConfirmModal {
+      z-index: 3500 !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    body.is-guest-mode #guestConfirmModal.active {
+      display: flex !important;
     }
 
     /* 饭店点菜抽屉式大弹窗 (防穿透与全屏自适应) */
@@ -2600,7 +2608,7 @@
         </div>
         <div style="display: flex; gap: 8px;">
           <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;" id="btnClearOrderCart">清空</button>
-          <button class="btn btn-primary" style="padding: 8px 18px; font-size: 13px; font-weight: 900;" id="btnGenerateReceipt">👨‍🍳 下单</button>
+          <button class="btn btn-primary" style="padding: 8px 18px; font-size: 13px; font-weight: 900;" id="btnGenerateReceipt" onclick="showOrderReceipt()">👨‍🍳 下单</button>
         </div>
       </div>
     </div>
@@ -2630,7 +2638,7 @@
   </div>
 
   <!-- 顾客下单输入昵称弹窗 -->
-  <div class="modal-overlay" id="guestConfirmModal">
+  <div class="modal-overlay" id="guestConfirmModal" style="z-index: 3500; align-items: center; justify-content: center;">
     <div class="receipt-paper" style="max-height: 80vh;">
       <h3 style="font-size: 17px; font-weight: 900; color: var(--ink); text-align: center; margin-bottom: 6px;">🛎️ 提交点单给主厨</h3>
       <p style="font-size: 12px; color: var(--ink-light); text-align: center; margin-bottom: 14px;">
@@ -2645,8 +2653,8 @@
         <input type="text" class="custom-pantry-input" id="guestNoteInput" placeholder="如：少放辣、多放葱花、清淡点" style="width: 100%; box-sizing: border-box;">
       </div>
       <div style="display: flex; gap: 8px;">
-        <button class="btn btn-secondary" style="flex: 1;" id="btnCancelGuestOrder">返回修改</button>
-        <button class="btn btn-primary" style="flex: 1;" id="btnSubmitGuestOrder">🚀 确认下单</button>
+        <button class="btn btn-secondary" style="flex: 1;" id="btnCancelGuestOrder" onclick="document.getElementById('guestConfirmModal').classList.remove('active')">返回修改</button>
+        <button class="btn btn-primary" style="flex: 1;" id="btnSubmitGuestOrder" onclick="submitGuestOrder()">🚀 确认下单</button>
       </div>
     </div>
   </div>
@@ -3374,6 +3382,7 @@
     function submitGuestOrder() {
       const nameInput = document.getElementById('guestNameInput');
       const noteInput = document.getElementById('guestNoteInput');
+      const submitBtn = document.getElementById('btnSubmitGuestOrder');
       const customerName = (nameInput.value || '').trim() || '好友';
       const note = (noteInput.value || '').trim();
 
@@ -3384,6 +3393,16 @@
           items.push({ id: r.id, name: r.name, qty, cover: r.cover || '🍲', time: r.time || '15分钟' });
         }
       });
+
+      if (items.length === 0) {
+        alert('购物车里还没有菜品，请先挑选菜品！');
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = '🚀 正在提交...';
+      }
 
       const now = new Date();
       const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -3403,12 +3422,21 @@
         method: 'POST',
         body: JSON.stringify(orderData)
       }).then(() => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '🚀 确认下单';
+        }
         document.getElementById('guestConfirmModal').classList.remove('active');
-        alert(`🎉 恭喜 ${customerName}，点单已成功送达主厨手机！主厨将很快为您开火下厨！`);
+        const totalCount = items.reduce((s, it) => s + it.qty, 0);
+        alert(`🎉 恭喜【${customerName}】，您的点单（共 ${totalCount} 道美味）已成功送达主厨手机！主厨将很快为您开火下厨！`);
         orderCart.clear();
         saveOrderCart();
         renderOrderMenuList();
       }).catch(() => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '🚀 确认下单';
+        }
         // 网络异常保底方案：生成微信小纸条
         document.getElementById('guestConfirmModal').classList.remove('active');
         const text = `🛎️ 主厨，我已点好菜：\n${items.map((it, i) => `${i+1}. ${it.name} x${it.qty}`).join('\n')}\n备注：${note || '无'}`;
