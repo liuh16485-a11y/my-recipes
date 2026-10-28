@@ -1,8 +1,10 @@
 // Service Worker for 随身私房菜谱
-const CACHE_NAME = 'recipe-app-v1';
+const CACHE_NAME = 'recipe-app-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './recipes_data.js',
+  './qrcode.min.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
